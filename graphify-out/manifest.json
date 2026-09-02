@@ -51,7 +51,7 @@
     "mtime": 1788237441.9604204,
     "seen": 1788286550.2790427,
     "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
-    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+    "semantic_hash": ""
   },
   "docs/01_preprocessing_spec.md": {
     "mtime": 1788261486.4847102,
@@ -66,9 +66,39 @@
     "semantic_hash": "404039967ce30d65744446c2da17bca4"
   },
   "requirements.txt": {
-    "mtime": 1788255222.4417508,
-    "seen": 1788286550.2790427,
-    "ast_hash": "44a2ab133f96f7a9839a0205779e3881",
-    "semantic_hash": "44a2ab133f96f7a9839a0205779e3881"
+    "mtime": 1788332523.623044,
+    "seen": 1788343278.3161838,
+    "ast_hash": "d7b866d966ac80d3f8fc910add234642",
+    "semantic_hash": "d7b866d966ac80d3f8fc910add234642"
+  },
+  "run_tokenizer_experiments.py": {
+    "mtime": 1788333144.383034,
+    "seen": 1788343278.3161838,
+    "ast_hash": "c9cb3ff550ff5859bfac09626292c6fc",
+    "semantic_hash": "c9cb3ff550ff5859bfac09626292c6fc"
+  },
+  "src/tokenizer.py": {
+    "mtime": 1788333349.4051828,
+    "seen": 1788343278.3161838,
+    "ast_hash": "040d62edfa7d929e7a27d353b83dc227",
+    "semantic_hash": "040d62edfa7d929e7a27d353b83dc227"
+  },
+  "tests/test_tokenization.py": {
+    "mtime": 1788339755.7965875,
+    "seen": 1788343278.3161838,
+    "ast_hash": "38a0d2b895472ed764a28488c81d4862",
+    "semantic_hash": "38a0d2b895472ed764a28488c81d4862"
+  },
+  "docs/02a_tokenizer_investigation.md": {
+    "mtime": 1788330945.6647751,
+    "seen": 1788343278.3161838,
+    "ast_hash": "76e8500a748f01ccaa58e592f26c7ffd",
+    "semantic_hash": "76e8500a748f01ccaa58e592f26c7ffd"
+  },
+  "docs/02b_tokenizer_experiments.md": {
+    "mtime": 1788342629.029514,
+    "seen": 1788343278.3161838,
+    "ast_hash": "14112e8287a90282c95e43726f183fe4",
+    "semantic_hash": "14112e8287a90282c95e43726f183fe4"
   }
 }
