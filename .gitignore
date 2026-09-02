@@ -36,3 +36,18 @@ data/raw/
 # OS
 .DS_Store
 Thumbs.db
+explanation.md
+dataset/train-00000-of-00001.parquet
+
+# Generated / processed data
+outputs/
+
+# SentencePiece / tokenizer artifacts
+*.model
+*.vocab
+
+# Graphify cache and internal artifacts
+graphify-out/cache/
+graphify-out/cost.json
+graphify-out/.graphify_*
+graphify-out/*.py
