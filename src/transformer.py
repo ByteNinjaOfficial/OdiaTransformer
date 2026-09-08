@@ -131,8 +131,9 @@ class ScaledDotProductAttention(nn.Module):
         if mask is not None:
             # Mask is True for valid tokens, False for masked tokens.
             # Replace False positions with a large negative value before softmax.
-            # Using -1e9 avoids float32 underflow/NaN issues when entire row is masked.
-            scores = scores.masked_fill(~mask, -1e9)
+            # Use -1e4 for float16/AMP compatibility (min float16 is ~ -65504) and -1e9 for float32.
+            fill_value = -1e4 if scores.dtype == torch.float16 else -1e9
+            scores = scores.masked_fill(~mask, fill_value)
 
         attn_weights = F.softmax(scores, dim=-1)
 
@@ -511,18 +512,17 @@ class TranslationTransformer(nn.Module):
         self._init_parameters()
 
     def _init_parameters(self) -> None:
-        """Initialize parameters with Xavier uniform for linear projections and zeros for biases.
+        """Initialize parameters with Xavier uniform for linear projections,
+        ones for LayerNorm weights, and zeros for biases.
         Preserves special zero-padding embedding behavior for padding_idx.
         """
-        for p in self.parameters():
+        for name, p in self.named_parameters():
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
             elif p.dim() == 1:
-                # Biases and LayerNorm weights
-                if p.requires_grad:
-                    # Keep LayerNorm weights as 1s, biases as 0s
-                    if "norm" in str(p):
-                        continue
+                if "norm" in name and name.endswith("weight"):
+                    nn.init.ones_(p)
+                else:
                     nn.init.zeros_(p)
 
         # Ensure padding embeddings are initialized to 0
