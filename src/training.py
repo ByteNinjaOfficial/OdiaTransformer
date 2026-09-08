@@ -48,6 +48,7 @@ class TrainingConfig:
     device: Optional[str] = None     # Resolved dynamically at runtime (cuda if available, else cpu)
     val_check_interval: Optional[int] = None  # None = validate at end of each epoch
     max_train_steps: Optional[int] = None
+    early_stopping_patience: int = 3  # 0 to disable early stopping
 
     def resolved_device(self) -> torch.device:
         """Resolve device dynamically to prevent device-binding issues when loading configs."""
@@ -143,6 +144,9 @@ def save_checkpoint(
     global_step: int = 0,
     val_loss: float = float("inf"),
     val_ppl: float = float("inf"),
+    best_val_loss: float = float("inf"),
+    early_stopping_counter: int = 0,
+    history: Optional[List[dict]] = None,
     config: Optional[TrainingConfig] = None,
 ) -> Path:
     """Save model and training state into a checkpoint file."""
@@ -154,6 +158,9 @@ def save_checkpoint(
         "global_step": global_step,
         "val_loss": val_loss,
         "val_ppl": val_ppl,
+        "best_val_loss": best_val_loss,
+        "early_stopping_counter": early_stopping_counter,
+        "history": history or [],
         "model_state_dict": model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict() if optimizer is not None else None,
         "scheduler_state_dict": scheduler.state_dict() if scheduler is not None else None,
@@ -241,6 +248,7 @@ class Trainer:
         self.global_step = 0
         self.current_epoch = 0
         self.best_val_loss = float("inf")
+        self.early_stopping_counter = 0
         self.history: List[Dict[str, Any]] = []
 
         # Directories
@@ -248,6 +256,23 @@ class Trainer:
         self.log_dir = Path(self.config.log_dir)
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
         self.log_dir.mkdir(parents=True, exist_ok=True)
+
+    def load_from_checkpoint(self, checkpoint_path: str | Path) -> dict:
+        """Restore model, optimizer, scheduler, scaler, and training counters from checkpoint."""
+        state = load_checkpoint(
+            filepath=checkpoint_path,
+            model=self.model,
+            optimizer=self.optimizer,
+            scheduler=self.scheduler,
+            scaler=self.scaler,
+            map_location=self.device,
+        )
+        self.current_epoch = state.get("epoch", 0)
+        self.global_step = state.get("global_step", 0)
+        self.best_val_loss = state.get("best_val_loss", state.get("val_loss", float("inf")))
+        self.early_stopping_counter = state.get("early_stopping_counter", 0)
+        self.history = state.get("history", [])
+        return state
 
     def train_step(self, batch: TranslationBatch) -> Tuple[float, float]:
         """Perform a single training step on a batch.
@@ -390,6 +415,11 @@ class Trainer:
             val_loss, val_ppl = self.validate(val_loader, max_batches=max_val_batches)
             is_best = self._handle_checkpoint(val_loss, val_ppl)
 
+            if is_best:
+                self.early_stopping_counter = 0
+            else:
+                self.early_stopping_counter += 1
+
             epoch_record = {
                 "epoch": epoch,
                 "global_step": self.global_step,
@@ -403,6 +433,17 @@ class Trainer:
             }
             self.history.append(epoch_record)
             self._save_history()
+
+            # Early stopping check
+            if (
+                self.config.early_stopping_patience > 0
+                and self.early_stopping_counter >= self.config.early_stopping_patience
+            ):
+                print(
+                    f"Early stopping triggered at epoch {epoch}: "
+                    f"validation loss did not improve for {self.config.early_stopping_patience} epochs."
+                )
+                break
 
             if self.config.max_train_steps is not None and self.global_step >= self.config.max_train_steps:
                 break
@@ -420,24 +461,10 @@ class Trainer:
         if is_best:
             self.best_val_loss = val_loss
 
-        # Save latest
-        save_checkpoint(
-            filepath=self.checkpoint_dir / "latest_checkpoint.pt",
-            model=self.model,
-            optimizer=self.optimizer,
-            scheduler=self.scheduler,
-            scaler=self.scaler,
-            epoch=self.current_epoch,
-            global_step=self.global_step,
-            val_loss=val_loss,
-            val_ppl=val_ppl,
-            config=self.config,
-        )
-
-        # Save best
-        if is_best:
+        # Save latest checkpoints (both latest.pt and latest_checkpoint.pt)
+        for name in ("latest.pt", "latest_checkpoint.pt"):
             save_checkpoint(
-                filepath=self.checkpoint_dir / "best_checkpoint.pt",
+                filepath=self.checkpoint_dir / name,
                 model=self.model,
                 optimizer=self.optimizer,
                 scheduler=self.scheduler,
@@ -446,14 +473,47 @@ class Trainer:
                 global_step=self.global_step,
                 val_loss=val_loss,
                 val_ppl=val_ppl,
+                best_val_loss=self.best_val_loss,
+                early_stopping_counter=self.early_stopping_counter,
+                history=self.history,
                 config=self.config,
             )
+
+        # Save best checkpoints (both best.pt and best_checkpoint.pt)
+        if is_best:
+            for name in ("best.pt", "best_checkpoint.pt"):
+                save_checkpoint(
+                    filepath=self.checkpoint_dir / name,
+                    model=self.model,
+                    optimizer=self.optimizer,
+                    scheduler=self.scheduler,
+                    scaler=self.scaler,
+                    epoch=self.current_epoch,
+                    global_step=self.global_step,
+                    val_loss=val_loss,
+                    val_ppl=val_ppl,
+                    best_val_loss=self.best_val_loss,
+                    early_stopping_counter=self.early_stopping_counter,
+                    history=self.history,
+                    config=self.config,
+                )
 
         return is_best
 
     def _save_history(self) -> None:
-        """Save training history to JSON."""
+        """Save training history and summary metrics to JSON."""
         history_path = self.log_dir / "training_history.json"
         with open(history_path, "w", encoding="utf-8") as f:
             json.dump(self.history, f, indent=2)
+
+        summary_path = self.log_dir / "metrics_summary.json"
+        summary = {
+            "total_epochs": self.current_epoch,
+            "global_step": self.global_step,
+            "best_val_loss": self.best_val_loss,
+            "best_val_ppl": math.exp(min(self.best_val_loss, 100.0)),
+            "last_record": self.history[-1] if self.history else None,
+        }
+        with open(summary_path, "w", encoding="utf-8") as f:
+            json.dump(summary, f, indent=2)
 

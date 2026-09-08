@@ -12,3 +12,6 @@ sentencepiece>=0.2
 
 # Phase 3 — PyTorch Dataset & DataLoader
 torch>=2.2.0
+
+# Phase 6 — Evaluation & Metrics
+sacrebleu>=2.4.0
