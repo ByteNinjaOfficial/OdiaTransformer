@@ -9,3 +9,6 @@ jupyter>=1.0
 
 # Phase 2 — Tokenization
 sentencepiece>=0.2
+
+# Phase 3 — PyTorch Dataset & DataLoader
+torch>=2.2.0
