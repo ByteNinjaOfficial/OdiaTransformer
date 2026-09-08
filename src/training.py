@@ -294,8 +294,8 @@ class Trainer:
             )
             # Flatten logits [B * L_t, V_tgt] and targets [B * L_t]
             loss = self.criterion(
-                logits.view(-1, self.model.tgt_vocab_size),
-                batch.tgt_output.view(-1),
+                logits.reshape(-1, self.model.tgt_vocab_size),
+                batch.tgt_output.reshape(-1),
             )
 
         # Backpropagation with AMP scaling
@@ -315,6 +315,31 @@ class Trainer:
         self.global_step += 1
 
         return loss.item(), lr
+
+    def validate_step(self, batch: TranslationBatch) -> float:
+        """Evaluate a single batch without gradient computation.
+
+        Args:
+            batch: TranslationBatch to evaluate.
+
+        Returns:
+            Scalar cross-entropy loss for the batch.
+        """
+        self.model.eval()
+        batch.to(self.device)
+        with torch.no_grad():
+            with torch.amp.autocast("cuda", enabled=self.use_amp):
+                logits = self.model(
+                    src=batch.src,
+                    tgt_input=batch.tgt_input,
+                    src_mask=batch.src_mask,
+                    tgt_mask=batch.tgt_mask,
+                )
+                loss = self.criterion(
+                    logits.reshape(-1, self.model.tgt_vocab_size),
+                    batch.tgt_output.reshape(-1),
+                )
+        return loss.item()
 
     def validate(
         self,
@@ -349,8 +374,8 @@ class Trainer:
                         tgt_mask=batch.tgt_mask,
                     )
                     loss = self.criterion(
-                        logits.view(-1, self.model.tgt_vocab_size),
-                        batch.tgt_output.view(-1),
+                        logits.reshape(-1, self.model.tgt_vocab_size),
+                        batch.tgt_output.reshape(-1),
                     )
 
                 # Count non-PAD target tokens

@@ -24,6 +24,11 @@ checkpoints/
 runs/
 wandb/
 
+# Experiment checkpoints and binary weights
+# Preserve JSON configs, metadata, benchmarks, and metrics for academic review.
+experiments/**/checkpoints/*
+!experiments/**/checkpoints/.gitkeep
+
 # Data
 data/raw/
 *.csv
