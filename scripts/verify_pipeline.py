@@ -1,8 +1,8 @@
 """Independent verification of Phase 1C outputs."""
 import sys, os, json
-sys.path.insert(0, os.path.abspath("src"))
-import pandas as pd
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+import pandas as pd
 
 OUT = Path("outputs")
 RAW = Path("dataset/train-00000-of-00001.parquet")

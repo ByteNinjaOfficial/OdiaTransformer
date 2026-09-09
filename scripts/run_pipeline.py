@@ -1,9 +1,9 @@
 """Run the Phase 1C preprocessing pipeline against the real Samanantar Odia parquet."""
 import sys, os
-sys.path.insert(0, os.path.abspath("src"))
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 import preprocessing as pp
-from pathlib import Path
 
 RAW = Path("dataset/train-00000-of-00001.parquet")
 OUT = Path("outputs")
