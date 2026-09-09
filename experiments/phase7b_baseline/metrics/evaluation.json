@@ -1,0 +1,40 @@
+{
+  "checkpoint_used": "experiments\\phase7b_baseline\\checkpoints\\best.pt",
+  "samples_evaluated": 500,
+  "test_cross_entropy": 4.9372,
+  "test_perplexity": 139.37,
+  "corpus_bleu_score": 3.7,
+  "bleu_breakdown": "BLEU = 3.70 19.3/5.5/2.0/0.9 (BP = 1.000 ratio = 1.169 hyp_len = 6213 ref_len = 5314)",
+  "sample_translations": [
+    {
+      "index": 1,
+      "english_source": "The project would be monitored by the Odisha Tourism Development Corporation (OTDC).",
+      "odia_reference": "ଓଡ଼ିଶା ପର୍ଯ୍ୟଟନ ଉନ୍ନୟନ ନିଗମ (ଓଟିଡିସି) ଏବଂ ଟିଡିସି ଏହାର ପରିଚାଳନା ଦାୟିତ୍ୱରେ ରହିବ।",
+      "odia_predicted": "ଓଡ଼ିଶା ପର୍ଯ୍ୟଟନ କ୍ଷେତ୍ରରେ ଓଡ଼ିଶା ପର୍ଯ୍ୟଟନ କ୍ଷେତ୍ରରେ ସହଯୋଗ କରିବ।"
+    },
+    {
+      "index": 2,
+      "english_source": "Extra space to put between the child and its upper and lower neighbors, in pixels",
+      "odia_reference": "ତଳ ସ୍ତର ଏବଂ ତାହାର ଉପର ଏବଂ ତଳ ପାଖ ସ୍ତର ମଧ୍ଯରେ ଥିବା ଅତିରିକ୍ତ ଖାଲି ସ୍ଥାନ, ପିକ୍ସେଲରେ",
+      "odia_predicted": "ଏହି ସମୟରେ, ଶିଶୁ ଓ ଶିଶୁ ମଧ୍ୟରେ ଥିବା"
+    },
+    {
+      "index": 3,
+      "english_source": "There will be harmony in the family.",
+      "odia_reference": "ପରିବାରରେ ମିଳାମିଶି ରହିବ।",
+      "odia_predicted": "ପାରିବାରିକ ସୁଖ-ବୟ ରହିବ।"
+    },
+    {
+      "index": 4,
+      "english_source": "Sourav is currently president of the Cricket Association of Bengal(CAB) and president of the editorial board with Wisden India.",
+      "odia_reference": "ସୌରଭ ବର୍ତ୍ତମାନ କ୍ରିକେଟ ଆସୋସିଆସନ ଅଫ ବେଙ୍ଗଲର ଅଧ୍ୟକ୍ଷ ଏବଂ ୱିସ୍ଡେନ ଇଣ୍ଡିଆର ସମ୍ପାଦକ ମଣ୍ଡଳୀର ଅଧ୍ୟକ୍ଷ ଅଛନ୍ତି ।",
+      "odia_predicted": "ଏବେ ଭାରତୀୟ କ୍ରିକେଟ ଦଳର ଅଧ୍ୟକ୍ଷ ତଥା ପୂର୍ବତନ ଅଧିନାୟକ ତଥା ଭାରତୀୟ କ୍ରିକେଟ ଦଳର ଅଧ୍ୟକ୍ଷ ଭାବେ ଦାୟିତ୍ୱ ଗ୍ରହଣ କରିଛନ୍ତି।"
+    },
+    {
+      "index": 5,
+      "english_source": "The government even ignored the recommendations of the Commission.",
+      "odia_reference": "ସରକାର କମିଟିର ଏହି ପ୍ରସ୍ତାବକୁ ମଧ୍ୟ ଅଣଦେଖା କରି ଆସୁଛନ୍ତି।",
+      "odia_predicted": "ସେହିପରି ସରକାର ମଧ୍ୟ ଏହି ପ୍ରସ୍ତାବ ଉପରେ ବିଚାର କରୁଛନ୍ତି।"
+    }
+  ]
+}

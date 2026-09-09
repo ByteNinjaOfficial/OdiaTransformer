@@ -408,9 +408,15 @@ class Trainer:
 
         for epoch in range(self.current_epoch + 1, self.config.num_epochs + 1):
             self.current_epoch = epoch
+            epoch_start_time = time.time()
             epoch_loss = 0.0
             epoch_tokens = 0
+            epoch_samples = 0
             epoch_batches = 0
+
+            # Reset peak memory stats per epoch if CUDA
+            if self.device.type == "cuda":
+                torch.cuda.reset_peak_memory_stats(self.device)
 
             for i, batch in enumerate(train_loader):
                 if max_train_batches is not None and i >= max_train_batches:
@@ -423,6 +429,7 @@ class Trainer:
                 non_pad = (batch.tgt_output != self.model.pad_id).sum().item()
                 epoch_loss += loss_val * non_pad
                 epoch_tokens += non_pad
+                epoch_samples += batch.src.size(0)
                 epoch_batches += 1
 
                 # In-epoch validation check interval if configured
@@ -433,6 +440,7 @@ class Trainer:
                     val_loss, val_ppl = self.validate(val_loader, max_batches=max_val_batches)
                     self._handle_checkpoint(val_loss, val_ppl)
 
+            epoch_duration = time.time() - epoch_start_time
             train_loss = epoch_loss / max(1, epoch_tokens)
             train_ppl = math.exp(min(train_loss, 100.0))
 
@@ -445,16 +453,34 @@ class Trainer:
             else:
                 self.early_stopping_counter += 1
 
+            # GPU Telemetry per epoch
+            gpu_telemetry = {}
+            if self.device.type == "cuda":
+                allocated_mb = torch.cuda.max_memory_allocated(self.device) / (1024 * 1024)
+                reserved_mb = torch.cuda.max_memory_reserved(self.device) / (1024 * 1024)
+                total_mb = torch.cuda.get_device_properties(self.device).total_memory / (1024 * 1024)
+                util_pct = (reserved_mb / total_mb * 100.0) if total_mb > 0 else 0.0
+                gpu_telemetry = {
+                    "peak_allocated_mb": round(allocated_mb, 2),
+                    "peak_reserved_mb": round(reserved_mb, 2),
+                    "total_gpu_memory_mb": round(total_mb, 2),
+                    "memory_utilization_pct": round(util_pct, 2),
+                }
+
             epoch_record = {
                 "epoch": epoch,
                 "global_step": self.global_step,
-                "train_loss": train_loss,
-                "train_ppl": train_ppl,
-                "val_loss": val_loss,
-                "val_ppl": val_ppl,
+                "train_loss": round(train_loss, 4),
+                "train_ppl": round(train_ppl, 2),
+                "val_loss": round(val_loss, 4),
+                "val_ppl": round(val_ppl, 2),
                 "learning_rate": self.scheduler.get_current_lr(),
+                "epoch_duration_seconds": round(epoch_duration, 2),
+                "samples_per_second": round(epoch_samples / max(0.001, epoch_duration), 2),
+                "tokens_per_second": round(epoch_tokens / max(0.001, epoch_duration), 2),
                 "is_best": is_best,
-                "elapsed_sec": time.time() - start_time,
+                "elapsed_sec": round(time.time() - start_time, 2),
+                **gpu_telemetry,
             }
             self.history.append(epoch_record)
             self._save_history()

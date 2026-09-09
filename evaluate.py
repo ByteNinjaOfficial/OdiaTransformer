@@ -8,6 +8,7 @@ Loads test Parquet split and model checkpoint, computes Loss, Perplexity, and Co
 from __future__ import annotations
 
 import argparse
+import json
 import math
 import sys
 from pathlib import Path
@@ -43,6 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--en-tokenizer", type=str, default="outputs/tokenizer_sep_en16000_or32000_en.model", help="English tokenizer path")
     parser.add_argument("--or-tokenizer", type=str, default="outputs/tokenizer_sep_en16000_or32000_or.model", help="Odia tokenizer path")
     parser.add_argument("--num-display-samples", type=int, default=5, help="Number of sample translations to display (default: 5)")
+    parser.add_argument("--output-json", type=str, default=None, help="Optional path to save evaluation metrics JSON")
     return parser.parse_args()
 
 
@@ -117,8 +119,8 @@ def main() -> None:
                 tgt_mask=batch.tgt_mask,
             )
             loss = criterion(
-                logits.view(-1, 32000),
-                batch.tgt_output.view(-1),
+                logits.reshape(-1, 32000),
+                batch.tgt_output.reshape(-1),
             )
             non_pad = (batch.tgt_output != PAD_ID).sum().item()
             total_loss += loss.item() * non_pad
@@ -165,12 +167,38 @@ def main() -> None:
 
     # 8. Display Sample Translation Pairs
     num_display = min(args.num_display_samples, len(predictions))
+    sample_list = []
     print(f"\nDisplaying {num_display} Sample Translations:")
     for i in range(num_display):
         print(f"\n--- [Sample {i+1}] ---")
         print(f"English (Source)    : {sources[i]}")
         print(f"Odia (Reference)    : {references[i]}")
         print(f"Odia (Predicted)    : {predictions[i]}")
+
+    for i in range(len(predictions)):
+        sample_list.append({
+            "index": i + 1,
+            "english_source": sources[i],
+            "odia_reference": references[i],
+            "odia_predicted": predictions[i],
+        })
+
+    # 9. Save JSON Evaluation Metrics if requested
+    if args.output_json:
+        out_json_path = Path(args.output_json)
+        out_json_path.parent.mkdir(parents=True, exist_ok=True)
+        eval_payload = {
+            "checkpoint_used": str(ckpt_path),
+            "samples_evaluated": len(predictions),
+            "test_cross_entropy": round(test_loss, 4),
+            "test_perplexity": round(test_ppl, 2),
+            "corpus_bleu_score": round(bleu_score.score, 2),
+            "bleu_breakdown": bleu_score.format(),
+            "sample_translations": sample_list[:args.num_display_samples],
+        }
+        with open(out_json_path, "w", encoding="utf-8") as f:
+            json.dump(eval_payload, f, indent=2, ensure_ascii=False)
+        print(f"\nSaved evaluation metrics to: {out_json_path}")
 
 
 if __name__ == "__main__":

@@ -72,6 +72,23 @@ def main() -> None:
     print("      OdiaTransformer Training Execution          ")
     print("==================================================")
 
+    # Preflight Check 1: Verify CUDA unless explicitly requested CPU
+    if args.device is None and not torch.cuda.is_available():
+        print("ERROR: CUDA is unavailable on this system. Full training requires GPU execution.")
+        print("Pass --device cpu explicitly if you intend to run on CPU.")
+        sys.exit(1)
+
+    # Preflight Check 2: Verify paths
+    for path_item in [
+        Path(args.data_dir) / "train.parquet",
+        Path(args.data_dir) / "val.parquet",
+        Path(args.en_tokenizer),
+        Path(args.or_tokenizer),
+    ]:
+        if not path_item.exists():
+            print(f"ERROR: Required data/tokenizer file not found: {path_item}")
+            sys.exit(1)
+
     # 1. Experiment Management Integration (if specified)
     exp_mgr = None
     checkpoint_dir = args.checkpoint_dir
@@ -106,7 +123,9 @@ def main() -> None:
 
     print(f"Device               : {device.type.upper()}")
     if device.type == "cuda":
-        print(f"GPU Name             : {torch.cuda.get_device_name(0)}")
+        props = torch.cuda.get_device_properties(0)
+        print(f"GPU Name             : {props.name}")
+        print(f"GPU Total VRAM       : {props.total_memory / (1024 * 1024):.2f} MB")
         print(f"AMP Autocast         : {config.use_amp}")
     print(f"Batch Size           : {config.batch_size}")
     print(f"Target Epochs        : {config.num_epochs}")

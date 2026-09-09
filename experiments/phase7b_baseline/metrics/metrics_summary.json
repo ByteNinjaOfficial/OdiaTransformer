@@ -1,0 +1,24 @@
+{
+  "total_epochs": 4,
+  "global_step": 487512,
+  "best_val_loss": 5.700538166085474,
+  "best_val_ppl": 299.0282845534765,
+  "last_record": {
+    "epoch": 4,
+    "global_step": 487512,
+    "train_loss": 5.921,
+    "train_ppl": 372.79,
+    "val_loss": 5.7005,
+    "val_ppl": 299.03,
+    "learning_rate": 0.0001265908628536572,
+    "epoch_duration_seconds": 6564.33,
+    "samples_per_second": 148.53,
+    "tokens_per_second": 2019.61,
+    "is_best": true,
+    "elapsed_sec": 26555.68,
+    "peak_allocated_mb": 1686.75,
+    "peak_reserved_mb": 3770.0,
+    "total_gpu_memory_mb": 4095.56,
+    "memory_utilization_pct": 92.05
+  }
+}

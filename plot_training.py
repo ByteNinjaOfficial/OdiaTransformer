@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -98,7 +99,23 @@ def main() -> None:
     plt.close()
     print(f"Saved: {val_path}")
 
-    # 3. Learning Rate Plot
+    # 3. Dedicated Perplexity Plot
+    train_ppls = [h.get("train_ppl", math.exp(min(h.get("train_loss", 0), 100.0))) for h in history]
+    plt.figure(figsize=(8, 5))
+    plt.plot(epochs, train_ppls, label="Train PPL", marker="o", color="#1f77b4", linewidth=2)
+    plt.plot(epochs, val_ppls, label="Val PPL", marker="^", color="#2ca02c", linewidth=2)
+    plt.title("OdiaTransformer — Training & Validation Perplexity", fontsize=14, fontweight="bold")
+    plt.xlabel("Epoch", fontsize=12)
+    plt.ylabel("Perplexity", fontsize=12)
+    plt.grid(True, linestyle="--", alpha=0.6)
+    plt.legend(fontsize=11)
+    plt.tight_layout()
+    ppl_path = out_dir / "perplexity.png"
+    plt.savefig(ppl_path, dpi=300)
+    plt.close()
+    print(f"Saved: {ppl_path}")
+
+    # 4. Learning Rate Plot
     plt.figure(figsize=(8, 5))
     plt.plot(epochs, lrs, label="Learning Rate", marker="d", color="#d62728", linewidth=2)
     plt.title("OdiaTransformer — Learning Rate Schedule", fontsize=14, fontweight="bold")

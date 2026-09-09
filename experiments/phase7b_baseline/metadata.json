@@ -1,0 +1,68 @@
+{
+  "timestamp": "2026-09-08T16:56:43.577382+00:00",
+  "git": {
+    "commit_hash": "dc92b6296156ac4f0abdc8ccb318d3796c0bf939",
+    "branch": "main"
+  },
+  "system": {
+    "os": "nt",
+    "platform": "Windows-11-10.0.22621-SP0",
+    "python_version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "python_executable": "D:\\GitHub\\FWC-TrainingProj\\Test-7\\.venv\\Scripts\\python.exe",
+    "pytorch_version": "2.14.0+cu126"
+  },
+  "hardware": {
+    "cuda_available": true,
+    "cuda_version": "12.6",
+    "device_count": 1,
+    "devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 2050",
+        "total_memory_bytes": 4294508544,
+        "total_memory_mb": 4095.56,
+        "major": 8,
+        "minor": 6,
+        "multi_processor_count": 16
+      }
+    ]
+  },
+  "reproducibility": {
+    "random_seed": 42
+  },
+  "dataset": {
+    "train_samples": 975020,
+    "validation_samples": 9949,
+    "test_samples": 9949
+  },
+  "model_config": {
+    "src_vocab_size": 16000,
+    "tgt_vocab_size": 32000,
+    "d_model": 128,
+    "num_heads": 4,
+    "num_encoder_layers": 2,
+    "num_decoder_layers": 2,
+    "d_ff": 512,
+    "dropout": 0.1,
+    "pad_id": 0
+  },
+  "training_config": {
+    "batch_size": 8,
+    "num_epochs": 10,
+    "learning_rate": 1.0,
+    "weight_decay": 0.0001,
+    "grad_clip_norm": 1.0,
+    "warmup_steps": 4000,
+    "label_smoothing": 0.1,
+    "num_workers": 0,
+    "pin_memory": true,
+    "checkpoint_dir": "D:\\GitHub\\FWC-TrainingProj\\Test-7\\experiments\\phase7b_baseline\\checkpoints",
+    "log_dir": "D:\\GitHub\\FWC-TrainingProj\\Test-7\\experiments\\phase7b_baseline\\metrics",
+    "seed": 42,
+    "use_amp": true,
+    "device": null,
+    "val_check_interval": null,
+    "max_train_steps": null,
+    "early_stopping_patience": 3
+  }
+}

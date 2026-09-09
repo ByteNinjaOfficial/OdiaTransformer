@@ -1,0 +1,19 @@
+{
+  "batch_size": 8,
+  "num_epochs": 10,
+  "learning_rate": 1.0,
+  "weight_decay": 0.0001,
+  "grad_clip_norm": 1.0,
+  "warmup_steps": 4000,
+  "label_smoothing": 0.1,
+  "num_workers": 0,
+  "pin_memory": true,
+  "checkpoint_dir": "D:\\GitHub\\FWC-TrainingProj\\Test-7\\experiments\\phase7b_baseline\\checkpoints",
+  "log_dir": "D:\\GitHub\\FWC-TrainingProj\\Test-7\\experiments\\phase7b_baseline\\metrics",
+  "seed": 42,
+  "use_amp": true,
+  "device": null,
+  "val_check_interval": null,
+  "max_train_steps": null,
+  "early_stopping_patience": 3
+}
